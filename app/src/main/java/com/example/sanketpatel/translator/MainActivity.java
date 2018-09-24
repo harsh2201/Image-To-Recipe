@@ -1,7 +1,10 @@
 package com.example.sanketpatel.translator;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.vision.Frame;
@@ -32,9 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_GALLERY = 0;
     private static final int REQUEST_CAMERA = 1;
+    StringBuilder detectedText;
 
     private static final String TAG = MainActivity.class.getSimpleName();
-
+    ImageButton imageButton;
     private Uri imageUri;
     private TextView detectedTextView;
     @Override
@@ -42,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        imageButton=(ImageButton)findViewById(R.id.copy);
         findViewById(R.id.choose_from_gallery).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,6 +58,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("brij", detectedText);
+                clipboard.setPrimaryClip(clip);
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        });
         findViewById(R.id.take_a_photo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            StringBuilder detectedText = new StringBuilder();
+            detectedText = new StringBuilder();
             for (TextBlock textBlock : textBlocks) {
                 if (textBlock != null && textBlock.getValue() != null) {
                     detectedText.append(textBlock.getValue());
@@ -112,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             detectedTextView.setText(detectedText);
+            
         }
         finally {
             textRecognizer.release();
