@@ -9,7 +9,6 @@
     </style>
 
 
-
     <style name="AppTheme2" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/dark_gray</item>
@@ -28,9 +27,22 @@
         <item name="android:tint">@color/gray</item>
     </style>
 
-    <color name="white">#ffffff</color>
+    <color name="white">#352626</color>
     <color name="gray">#c4c4c4</color>
     <color name="dark_gray">#3f3f3f</color>
     <color name="dark_gray_status">#2a2a2a</color>
 
+    <style name="AppTheme2.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme2.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

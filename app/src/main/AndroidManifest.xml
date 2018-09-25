@@ -29,8 +29,10 @@
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="ocr" />
 
-        <activity android:name=".MainActivity" />
-        <activity android:name=".second_splash"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/Theme.AppCompat" />
+        <activity android:name=".second_splash" />
     </application>
 
 </manifest>

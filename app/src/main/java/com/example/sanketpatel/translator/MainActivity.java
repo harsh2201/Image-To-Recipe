@@ -8,15 +8,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -42,11 +45,18 @@ public class MainActivity extends AppCompatActivity {
     ImageButton imageButton;
     private Uri imageUri;
     private TextView detectedTextView;
+
+
+    FloatingActionButton fab,fab1,fab2;
+    boolean isOpen=false;
+    boolean isClose=false;
+    Animation fabopen,fabclose,fabforward,fabbackward;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         imageButton=(ImageButton)findViewById(R.id.copy);
         findViewById(R.id.choose_from_gallery).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,21 +75,6 @@ public class MainActivity extends AppCompatActivity {
                 ClipData clip = ClipData.newPlainText("brij", detectedText);
                 clipboard.setPrimaryClip(clip);
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
         });
         findViewById(R.id.take_a_photo).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,8 +95,46 @@ public class MainActivity extends AppCompatActivity {
 
         detectedTextView = (TextView) findViewById(R.id.detected_text);
         detectedTextView.setMovementMethod(new ScrollingMovementMethod());
+
+
+
+
+
+
+
+
+
+
+
+       
+
         
     }
+
+    private void animateFab()
+    {
+        if(isOpen)
+        {
+            fab.startAnimation(fabforward);
+            fab1.startAnimation(fabclose);
+            fab2.startAnimation(fabclose);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isOpen=false;
+
+        }
+
+        else{
+            fab.startAnimation(fabbackward);
+            fab1.startAnimation(fabopen);
+            fab2.startAnimation(fabopen);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isOpen=true;
+
+        }
+    }
+
 
     private void inspectFromBitmap(Bitmap bitmap) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(this).build();
@@ -141,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             detectedTextView.setText(detectedText);
+            detectedTextView.setTextColor(Color.BLACK);
+
             
         }
         finally {
