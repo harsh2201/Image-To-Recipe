@@ -1,6 +1,7 @@
 package com.example.sanketpatel.translator;
 
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
@@ -11,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -26,11 +28,16 @@ import android.widget.TextView;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.theartofdev.edmodo.cropper.CropImage;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -47,17 +54,24 @@ public class MainActivity extends AppCompatActivity {
     private TextView detectedTextView;
 
 
-    FloatingActionButton fab,fab1,fab2;
-    boolean isOpen=false;
-    boolean isClose=false;
-    Animation fabopen,fabclose,fabforward,fabbackward;
+    FloatingActionButton fab, fab1, fab2;
+    boolean isOpen = false;
+    boolean isClose = false;
+    Animation fabopen, fabclose, fabforward, fabbackward;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imageButton=(ImageButton)findViewById(R.id.copy);
+
+        CropImage
+                .activity()
+                .setActivityTitle("Crop Image")
+                .setAllowCounterRotation(false)
+                .setAllowRotation(false);
+
+        imageButton = (ImageButton) findViewById(R.id.copy);
         findViewById(R.id.choose_from_gallery).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,40 +111,24 @@ public class MainActivity extends AppCompatActivity {
         detectedTextView.setMovementMethod(new ScrollingMovementMethod());
 
 
-
-
-
-
-
-
-
-
-
-       
-
-        
     }
 
-    private void animateFab()
-    {
-        if(isOpen)
-        {
+    private void animateFab() {
+        if (isOpen) {
             fab.startAnimation(fabforward);
             fab1.startAnimation(fabclose);
             fab2.startAnimation(fabclose);
             fab1.setClickable(false);
             fab2.setClickable(false);
-            isOpen=false;
+            isOpen = false;
 
-        }
-
-        else{
+        } else {
             fab.startAnimation(fabbackward);
             fab1.startAnimation(fabopen);
             fab2.startAnimation(fabopen);
             fab1.setClickable(true);
             fab2.setClickable(true);
-            isOpen=true;
+            isOpen = true;
 
         }
     }
@@ -176,9 +174,8 @@ public class MainActivity extends AppCompatActivity {
             detectedTextView.setText(detectedText);
             detectedTextView.setTextColor(Color.BLACK);
 
-            
-        }
-        finally {
+
+        } finally {
             textRecognizer.release();
         }
     }
@@ -210,19 +207,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    private Uri saveBitmap(Bitmap bitmap) {
+        Uri uri = null;
+        String path = Environment.getExternalStorageDirectory().toString();
+        String filename = new SimpleDateFormat("MMddyyyy_HHmmss")
+                .format(Calendar.getInstance().getTime()) + ".png";
+        File dir = new File(path, getPackageName());
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        File outputFile = new File(dir.getAbsolutePath(), filename);
+        try {
+            outputFile.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+            // CropImage.activity(Uri.fromFile(outputFile)).start(MainActivity.this);
+            Log.i("INfoo", "Done!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Uri.fromFile(outputFile);
+
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_GALLERY:
                 if (resultCode == RESULT_OK) {
-                    inspect(data.getData());
+//                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                    CropImage.activity(data.getData()).start(MainActivity.this);
                 }
                 break;
             case REQUEST_CAMERA:
                 if (resultCode == RESULT_OK) {
                     if (imageUri != null) {
-                        inspect(imageUri);
+//                        Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                        CropImage.activity(imageUri).start(MainActivity.this);
                     }
+                }
+                break;
+            case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                    inspect(result.getUri());
                 }
                 break;
             default:
