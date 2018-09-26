@@ -1,7 +1,6 @@
 package com.example.sanketpatel.translator;
 
 import android.app.AlertDialog;
-import android.app.Application;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
@@ -13,6 +12,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -22,9 +22,11 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.sanketpatel.translator.Utils.ViewUtils;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -54,9 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView detectedTextView;
 
 
-    FloatingActionButton fab, fab1, fab2;
+    FloatingActionButton fabAdd, fabOpenGallery, fabOpenCam;
     boolean isOpen = false;
-    boolean isClose = false;
     Animation fabopen, fabclose, fabforward, fabbackward;
 
 
@@ -72,15 +73,6 @@ public class MainActivity extends AppCompatActivity {
                 .setAllowRotation(false);
 
         imageButton = (ImageButton) findViewById(R.id.copy);
-        findViewById(R.id.choose_from_gallery).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent, REQUEST_GALLERY);
-            }
-        });
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,9 +82,66 @@ public class MainActivity extends AppCompatActivity {
                 clipboard.setPrimaryClip(clip);
             }
         });
-        findViewById(R.id.take_a_photo).setOnClickListener(new View.OnClickListener() {
+
+        //TODO: Remove this
+        //findViewById(R.id.choose_from_gallery).setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View v) {
+        //        Intent intent = new Intent();
+        //        intent.setType("image/*");
+        //        intent.setAction(Intent.ACTION_GET_CONTENT);
+        //        startActivityForResult(intent, REQUEST_GALLERY);
+        //    }
+        //});
+        //findViewById(R.id.take_a_photo).setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View v) {
+        //        String filename = System.currentTimeMillis() + ".jpg";
+        //
+        //        ContentValues values = new ContentValues();
+        //        values.put(MediaStore.Images.Media.TITLE, filename);
+        //        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        //        imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        //
+        //        Intent intent = new Intent();
+        //        intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        //        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        //        startActivityForResult(intent, REQUEST_CAMERA);
+        //    }
+        //});
+
+        detectedTextView = (TextView) findViewById(R.id.detected_text);
+        detectedTextView.setMovementMethod(new ScrollingMovementMethod());
+        init();
+
+    }
+
+    private void init() {
+
+        fabAdd = findViewById(R.id.main_addFAB);
+        fabOpenCam = findViewById(R.id.main_openCamFAB);
+        fabOpenGallery = findViewById(R.id.main_openGalerryFAB);
+        fabOpenCam.setVisibility(View.GONE);
+        fabOpenGallery.setVisibility(View.GONE);
+
+
+        fabforward = AnimationUtils.loadAnimation(this, R.anim.rotoate_forward);
+        fabbackward = AnimationUtils.loadAnimation(this, R.anim.rotoate_backward);
+        fabopen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+        fabclose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+
+        fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
+                animateFab();
+            }
+        });
+
+        fabOpenCam.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                animateFab();
                 String filename = System.currentTimeMillis() + ".jpg";
 
                 ContentValues values = new ContentValues();
@@ -100,37 +149,55 @@ public class MainActivity extends AppCompatActivity {
                 values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
                 imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-                Intent intent = new Intent();
-                intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                Intent intent = new Intent()
+                        .setAction(MediaStore.ACTION_IMAGE_CAPTURE)
+                        .putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+
                 startActivityForResult(intent, REQUEST_CAMERA);
             }
         });
 
-        detectedTextView = (TextView) findViewById(R.id.detected_text);
-        detectedTextView.setMovementMethod(new ScrollingMovementMethod());
+        fabOpenGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                animateFab(); 
+                Intent intent = new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, REQUEST_GALLERY);
+            }
 
-
+        });
     }
 
     private void animateFab() {
         if (isOpen) {
-            fab.startAnimation(fabforward);
-            fab1.startAnimation(fabclose);
-            fab2.startAnimation(fabclose);
-            fab1.setClickable(false);
-            fab2.setClickable(false);
-            isOpen = false;
+            fabOpenGallery.startAnimation(fabclose);
+            fabOpenCam.startAnimation(fabclose);
+            fabAdd.startAnimation(fabbackward);
+            ViewUtils.setClickable(false, fabOpenGallery, fabOpenCam);
 
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ViewUtils.setAlpha(1, fabOpenCam, fabOpenGallery);
+                }
+            }, 300);
         } else {
-            fab.startAnimation(fabbackward);
-            fab1.startAnimation(fabopen);
-            fab2.startAnimation(fabopen);
-            fab1.setClickable(true);
-            fab2.setClickable(true);
-            isOpen = true;
+            ViewUtils.setVisible(fabOpenCam, fabOpenGallery);
 
+            fabAdd.startAnimation(fabforward);
+            fabOpenGallery.startAnimation(fabopen);
+            fabOpenCam.startAnimation(fabopen);
+
+            ViewUtils.setClickable(true, fabOpenGallery, fabOpenCam);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ViewUtils.setAlpha(1, fabOpenCam, fabOpenGallery);
+                }
+            }, 300);
         }
+        isOpen = !isOpen;
     }
 
 
@@ -207,7 +274,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private Uri saveBitmap(Bitmap bitmap) {
         Uri uri = null;
         String path = Environment.getExternalStorageDirectory().toString();
@@ -233,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
         return Uri.fromFile(outputFile);
 
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
