@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">translator</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="product_name">Product name</string>
+    <string name="enter_name">Enter name</string>
+    <string name="enter_quantity">Enter quantity</string>
 </resources>

@@ -16,6 +16,8 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,6 +27,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.sanketpatel.translator.Utils.ViewUtils;
 import com.google.android.gms.vision.Frame;
@@ -53,18 +56,42 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     ImageButton imageButton;
     private Uri imageUri;
-    private TextView detectedTextView;
+    static TextView detectedTextView;
 
 
     FloatingActionButton fabAdd, fabOpenGallery, fabOpenCam;
     boolean isOpen = false;
     Animation fabopen, fabclose, fabforward, fabbackward;
 
+    private SqliteDatabase mDatabase;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        RecyclerView productView = (RecyclerView)findViewById(R.id.product_list);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        productView.setLayoutManager(linearLayoutManager);
+        productView.setHasFixedSize(true);
+
+        mDatabase = new SqliteDatabase(this);
+        List<Product> allProducts = mDatabase.listProducts();
+
+        if(allProducts.size() > 0){
+            productView.setVisibility(View.VISIBLE);
+            ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
+            productView.setAdapter(mAdapter);
+
+        }else {
+            productView.setVisibility(View.GONE);
+            Toast.makeText(this, "There is no product in the database. Start adding now", Toast.LENGTH_LONG).show();
+        }
+
 
         CropImage
                 .activity()
@@ -113,6 +140,11 @@ public class MainActivity extends AppCompatActivity {
         detectedTextView = (TextView) findViewById(R.id.detected_text);
         detectedTextView.setMovementMethod(new ScrollingMovementMethod());
         init();
+
+
+
+
+
 
     }
 
@@ -240,6 +272,15 @@ public class MainActivity extends AppCompatActivity {
 
             detectedTextView.setText(detectedText);
             detectedTextView.setTextColor(Color.BLACK);
+            Product newProduct = new Product(detectedText.toString(), 0);
+            mDatabase.addProduct(newProduct);
+
+            //refresh the activity
+            finish();
+
+
+
+
 
 
         } finally {
