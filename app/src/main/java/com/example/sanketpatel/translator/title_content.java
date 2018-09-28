@@ -11,10 +11,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gospelware.liquidbutton.LiquidButton;
+
 import static com.example.sanketpatel.translator.MainActivity.mDatabase;
 
 public class title_content extends AppCompatActivity {
-
+    LiquidButton liquidButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +39,7 @@ public class title_content extends AppCompatActivity {
 
                 if (TextUtils.isEmpty(name)) {
                     Toast.makeText(title_content.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
+                    finish();
                 } else {
                     String uri = "";
                     try {
@@ -47,12 +50,12 @@ public class title_content extends AppCompatActivity {
                     Log.i("Infoo", newProduct.toString());
                     newProduct.setUri(uri);
                     mDatabase.addProduct(newProduct);
-
+                   //  Toast.makeText(title_content.this,"Text Recognization In Progress",Toast.LENGTH_LONG).show();
                     //refresh the activity
-                    finish();
-                    Intent i = new Intent(title_content.this, MainActivity.class);
-                    startActivity(i);
-                    finish();
+                    SmartyToast.makeText(getApplicationContext(),"Updating...",SmartyToast.LENGTH_SHORT,SmartyToast.UPDATE);
+                   
+                    liquidButton.startPour();
+
 
                 }
             }
@@ -62,9 +65,45 @@ public class title_content extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(title_content.this, "Task cancelled", Toast.LENGTH_LONG).show();
+                finish();
             }
         });
         builder.show();
+
+        liquidButton = (LiquidButton) findViewById(R.id.button);
+
+
+//        liquidButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                LiquidButton btn = (LiquidButton) v;
+//                btn.startPour();
+//            }
+//        });
+        liquidButton.setFillAfter(true);
+        liquidButton.setAutoPlay(true);
+        liquidButton.setPourFinishListener(new LiquidButton.PourFinishListener() {
+            @Override
+            public void onPourFinish() {
+
+                Toast.makeText(title_content.this, "Task Successfull", Toast.LENGTH_LONG).show();
+                Intent i = new Intent(title_content.this, MainActivity.class);
+                startActivity(i);
+                finish();
+            }
+
+            @Override
+            public void onProgressUpdate(float progress) {
+                // textView.setText(String.format("%.2f", progress * 100) + "%");
+
+                liquidButton.changeProgress(progress);
+                liquidButton.finishPour();
+            }
+        });
+
+
+        //Liquid Button
+
 
     }
 }

@@ -44,7 +44,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -292,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
 //            mDatabase.addProduct(newProduct);
 //
 //            //refresh the activity
-//            finish();
+           finish();
 
 
         } finally {
@@ -412,6 +411,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
                 } else {
                     startActivity(getIntent());
+                    finish();
                 }
             }
         });

@@ -7,4 +7,14 @@
     android:layout_height="match_parent"
     tools:context="com.example.sanketpatel.translator.title_content">
 
+
+    <com.gospelware.liquidbutton.LiquidButton
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:clickable="true" />
+
+
+
 </android.support.constraint.ConstraintLayout>
