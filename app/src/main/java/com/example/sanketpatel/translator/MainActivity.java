@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,13 +19,16 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     boolean isOpen = false;
     Animation fabopen, fabclose, fabforward, fabbackward;
 
-    private SqliteDatabase mDatabase;
+    static SqliteDatabase mDatabase;
 
 
 
@@ -272,11 +276,14 @@ public class MainActivity extends AppCompatActivity {
 
             detectedTextView.setText(detectedText);
             detectedTextView.setTextColor(Color.BLACK);
-            Product newProduct = new Product(detectedText.toString(), 0);
-            mDatabase.addProduct(newProduct);
-
-            //refresh the activity
-            finish();
+          
+            Intent i=new Intent(MainActivity.this,title_content.class);
+            startActivity(i);
+//            Product newProduct = new Product(detectedText.toString(), 0);
+//            mDatabase.addProduct(newProduct);
+//
+//            //refresh the activity
+//            finish();
 
 
 
@@ -347,14 +354,21 @@ public class MainActivity extends AppCompatActivity {
             case REQUEST_GALLERY:
                 if (resultCode == RESULT_OK) {
 //                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+
+
                     CropImage.activity(data.getData()).start(MainActivity.this);
+
+
                 }
                 break;
             case REQUEST_CAMERA:
                 if (resultCode == RESULT_OK) {
                     if (imageUri != null) {
 //                        Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+
                         CropImage.activity(imageUri).start(MainActivity.this);
+
+
                     }
                 }
                 break;
@@ -368,6 +382,44 @@ public class MainActivity extends AppCompatActivity {
                 super.onActivityResult(requestCode, resultCode, data);
                 break;
         }
+
+
     }
+    private int addTaskDialog(){
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View subView = inflater.inflate(R.layout.add_product_layout, null);
+
+        final EditText nameField = (EditText)subView.findViewById(R.id.enter_name);
+
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+        builder.setTitle("Add new product");
+        builder.setView(subView);
+        builder.create();
+
+        builder.setPositiveButton("ADD PRODUCT", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String name = nameField.getText().toString();
+      //          final int quantity = Integer.parseInt(quantityField.getText().toString());
+
+                if(TextUtils.isEmpty(name)){
+                    Toast.makeText(MainActivity.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    startActivity(getIntent());
+                }
+            }
+        });
+
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this, "Task cancelled", Toast.LENGTH_LONG).show();
+            }
+        });
+        builder.show();
+        return 1 ;
+    }
+
 
 }

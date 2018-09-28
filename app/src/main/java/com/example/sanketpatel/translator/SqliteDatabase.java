@@ -50,7 +50,7 @@ public class SqliteDatabase extends SQLiteOpenHelper {
             do{
                 int id = Integer.parseInt(cursor.getString(0));
                 String name = cursor.getString(1);
-                int quantity = Integer.parseInt(cursor.getString(2));
+                String quantity = (cursor.getString(2));
                 storeProducts.add(new Product(id, name, quantity));
             }while (cursor.moveToNext());
         }
@@ -82,7 +82,7 @@ public class SqliteDatabase extends SQLiteOpenHelper {
         if	(cursor.moveToFirst()){
             int id = Integer.parseInt(cursor.getString(0));
             String productName = cursor.getString(1);
-            int productQuantity = Integer.parseInt(cursor.getString(2));
+            String productQuantity =(cursor.getString(2));
             mProduct = new Product(id, productName, productQuantity);
         }
         cursor.close();

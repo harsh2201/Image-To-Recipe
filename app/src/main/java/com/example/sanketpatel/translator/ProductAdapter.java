@@ -37,6 +37,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
         final Product singleProduct = listProducts.get(position);
 
         holder.name.setText(singleProduct.getName());
+        holder.desc.setText(singleProduct.getQuantity());
 
 //        holder.editProduct.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -108,7 +109,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
 //            Toast.makeText(context, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
 //        }
 //        else{
-            mDatabase.updateProduct(new Product(product.getId(), name, 0));
+            mDatabase.updateProduct(new Product(product.getId(), name, "brij"));
             //refresh the activity
             ((Activity)context).finish();
             context.startActivity(((Activity)context).getIntent());

@@ -3,14 +3,14 @@ package com.example.sanketpatel.translator;
 public class Product {
     private	int	id;
     private	String name;
-    private	int	quantity;
+    private	String	quantity;
 
-    public Product(String name, int quantity) {
+    public Product(String name, String quantity) {
         this.name = name;
         this.quantity = quantity;
     }
 
-    public Product(int id, String name, int quantity) {
+    public Product(int id, String name, String quantity) {
         this.id = id;
         this.name = name;
         this.quantity = quantity;
@@ -32,11 +32,11 @@ public class Product {
         this.name = name;
     }
 
-    public int getQuantity() {
+    public String getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(String quantity) {
         this.quantity = quantity;
     }
 }
