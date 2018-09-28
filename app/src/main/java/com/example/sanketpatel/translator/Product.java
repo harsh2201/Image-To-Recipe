@@ -1,13 +1,26 @@
 package com.example.sanketpatel.translator;
 
-public class Product {
-    private	int	id;
-    private	String name;
-    private	String	quantity;
+import java.io.Serializable;
+
+public class Product implements Serializable {
+    private int id;
+    private String name;
+    private String quantity;
+    private String uri;
+
+    public Product() {
+    }
 
     public Product(String name, String quantity) {
         this.name = name;
         this.quantity = quantity;
+    }
+
+    public Product(int id, String name, String quantity, String uri) {
+        this.id = id;
+        this.name = name;
+        this.quantity = quantity;
+        this.uri = uri;
     }
 
     public Product(int id, String name, String quantity) {
@@ -38,5 +51,23 @@ public class Product {
 
     public void setQuantity(String quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", quantity='" + quantity + '\'' +
+                ", uri='" + uri + '\'' +
+                '}';
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 }

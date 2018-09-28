@@ -44,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -70,15 +71,13 @@ public class MainActivity extends AppCompatActivity {
     static SqliteDatabase mDatabase;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-        RecyclerView productView = (RecyclerView)findViewById(R.id.product_list);
+        RecyclerView productView = (RecyclerView) findViewById(R.id.product_list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         productView.setLayoutManager(linearLayoutManager);
         productView.setHasFixedSize(true);
@@ -86,12 +85,23 @@ public class MainActivity extends AppCompatActivity {
         mDatabase = new SqliteDatabase(this);
         List<Product> allProducts = mDatabase.listProducts();
 
-        if(allProducts.size() > 0){
+        if (allProducts.size() > 0) {
             productView.setVisibility(View.VISIBLE);
             ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
+
+            // OnClickListener
+            mAdapter.setOnClickListener(new ProductAdapter.OnClickListener() {
+                @Override
+                public void onClick(Product product) {
+                    Intent i = new Intent(getApplicationContext(), ViewProductActivity.class);
+                    i.putExtra("product", product);
+                    startActivity(i);
+                }
+            });
+
             productView.setAdapter(mAdapter);
 
-        }else {
+        } else {
             productView.setVisibility(View.GONE);
             Toast.makeText(this, "There is no product in the database. Start adding now", Toast.LENGTH_LONG).show();
         }
@@ -146,10 +156,6 @@ public class MainActivity extends AppCompatActivity {
         init();
 
 
-
-
-
-
     }
 
     private void init() {
@@ -196,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
         fabOpenGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                animateFab(); 
+                animateFab();
                 Intent intent = new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(intent, REQUEST_GALLERY);
             }
@@ -237,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void inspectFromBitmap(Bitmap bitmap) {
+    private void inspectFromBitmap(Bitmap bitmap, Uri uri) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(this).build();
         try {
             if (!textRecognizer.isOperational()) {
@@ -276,18 +282,17 @@ public class MainActivity extends AppCompatActivity {
 
             detectedTextView.setText(detectedText);
             detectedTextView.setTextColor(Color.BLACK);
-          
-            Intent i=new Intent(MainActivity.this,title_content.class);
+
+            // sending uri
+            Intent i = new Intent(MainActivity.this, title_content.class);
+            i.putExtra("uri", uri.toString());
+            i.putExtra("text", detectedText.toString());
             startActivity(i);
 //            Product newProduct = new Product(detectedText.toString(), 0);
 //            mDatabase.addProduct(newProduct);
 //
 //            //refresh the activity
 //            finish();
-
-
-
-
 
 
         } finally {
@@ -305,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
             options.inSampleSize = 2;
             options.inScreenDensity = DisplayMetrics.DENSITY_LOW;
             bitmap = BitmapFactory.decodeStream(is, null, options);
-            inspectFromBitmap(bitmap);
+            inspectFromBitmap(bitmap, uri);
         } catch (FileNotFoundException e) {
             Log.w(TAG, "Failed to find the file: " + uri, e);
         } finally {
@@ -385,11 +390,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    private int addTaskDialog(){
+
+    private int addTaskDialog() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View subView = inflater.inflate(R.layout.add_product_layout, null);
 
-        final EditText nameField = (EditText)subView.findViewById(R.id.enter_name);
+        final EditText nameField = (EditText) subView.findViewById(R.id.enter_name);
 
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
         builder.setTitle("Add new product");
@@ -400,12 +406,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String name = nameField.getText().toString();
-      //          final int quantity = Integer.parseInt(quantityField.getText().toString());
+                //          final int quantity = Integer.parseInt(quantityField.getText().toString());
 
-                if(TextUtils.isEmpty(name)){
+                if (TextUtils.isEmpty(name)) {
                     Toast.makeText(MainActivity.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
-                }
-                else{
+                } else {
                     startActivity(getIntent());
                 }
             }
@@ -418,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.show();
-        return 1 ;
+        return 1;
     }
 
 

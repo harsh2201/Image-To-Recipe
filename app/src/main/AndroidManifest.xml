@@ -36,8 +36,10 @@
             android:name=".MainActivity"
             android:theme="@style/Theme.AppCompat" />
         <activity android:name=".second_splash" />
-        <activity android:name=".title_content"
-          ></activity>
+        <activity android:name=".title_content" />
+        <activity
+            android:name=".ViewProductActivity"
+            android:theme="@style/Theme.AppCompat" />
     </application>
 
 </manifest>

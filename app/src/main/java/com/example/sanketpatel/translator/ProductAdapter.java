@@ -3,22 +3,30 @@ package com.example.sanketpatel.translator;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
+import java.util.logging.ConsoleHandler;
 
 /**
  * Created by Sanket Patel on 27-09-2018.
  */
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
+public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
 
     private Context context;
     private List<Product> listProducts;
 
     private SqliteDatabase mDatabase;
+
+    public interface OnClickListener {
+        public void onClick(Product product);
+    }
+
+    private OnClickListener onClickListener;
 
     public ProductAdapter(Context context, List<Product> listProducts) {
         this.context = context;
@@ -33,11 +41,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(ProductViewHolder holder, int position) {
+    public void onBindViewHolder(ProductViewHolder holder, final int position) {
         final Product singleProduct = listProducts.get(position);
 
         holder.name.setText(singleProduct.getName());
         holder.desc.setText(singleProduct.getQuantity());
+
+        holder.layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (onClickListener != null){
+                    Log.i("INFOO", listProducts.get(position).toString());
+                    onClickListener.onClick(listProducts.get(position));
+                }
+            }
+        });
 
 //        holder.editProduct.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -66,7 +84,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
     }
 
 
-    private void editTaskDialog(final Product product){
+    private void editTaskDialog(final Product product) {
         LayoutInflater inflater = LayoutInflater.from(context);
 //        View subView = inflater.inflate(R.layout.add_product_layout, null);
 //
@@ -103,16 +121,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
 //        });
 
         final String name = MainActivity.detectedTextView.toString();
-      //  final int quantity = Integer.parseInt(quantityField.getText().toString());
+        //  final int quantity = Integer.parseInt(quantityField.getText().toString());
 
 //        if(TextUtils.isEmpty(name) || quantity <= 0){
 //            Toast.makeText(context, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
 //        }
 //        else{
-            mDatabase.updateProduct(new Product(product.getId(), name, "brij"));
-            //refresh the activity
-            ((Activity)context).finish();
-            context.startActivity(((Activity)context).getIntent());
+        mDatabase.updateProduct(new Product(product.getId(), name, "brij"));
+        //refresh the activity
+        ((Activity) context).finish();
+        context.startActivity(((Activity) context).getIntent());
         //}
 
 //        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -122,6 +140,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder>{
 //            }
 //        });
 //        builder.show();
+    }
+
+    public OnClickListener getOnClickListener() {
+        return onClickListener;
+    }
+
+    public void setOnClickListener(OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
     }
 }
 

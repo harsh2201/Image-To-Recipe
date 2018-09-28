@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 public class ProductViewHolder extends RecyclerView.ViewHolder {
 
+    public View layout;
+
     public TextView name;
     public TextView desc;
 
@@ -16,6 +18,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
 
     public ProductViewHolder(View itemView) {
         super(itemView);
+        layout = itemView;
         name = (TextView)itemView.findViewById(R.id.product_name);
         desc = (TextView)itemView.findViewById(R.id.product_desc);
         //deleteProduct = (ImageView)itemView.findViewById(R.id.delete_product);

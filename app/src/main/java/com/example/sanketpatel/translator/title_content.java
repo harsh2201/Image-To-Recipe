@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -21,7 +22,7 @@ public class title_content extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View subView = inflater.inflate(R.layout.add_product_layout, null);
 
-        final EditText nameField = (EditText)subView.findViewById(R.id.enter_name);
+        final EditText nameField = (EditText) subView.findViewById(R.id.enter_name);
 
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
         builder.setTitle("Add new product");
@@ -34,20 +35,25 @@ public class title_content extends AppCompatActivity {
                 final String name = nameField.getText().toString();
                 //          final int quantity = Integer.parseInt(quantityField.getText().toString());
 
-                if(TextUtils.isEmpty(name)){
+                if (TextUtils.isEmpty(name)) {
                     Toast.makeText(title_content.this, "Something went wrong. Check your input values", Toast.LENGTH_LONG).show();
-                }
-                else{
-
-                    Product newProduct = new Product(name,MainActivity.detectedTextView.getText().toString());
+                } else {
+                    String uri = "";
+                    try {
+                        uri = getIntent().getStringExtra("uri");
+                    } catch (Exception e) {
+                    }
+                    Product newProduct = new Product(name, MainActivity.detectedTextView.getText().toString());
+                    Log.i("Infoo", newProduct.toString());
+                    newProduct.setUri(uri);
                     mDatabase.addProduct(newProduct);
 
                     //refresh the activity
                     finish();
-                    Intent i =new Intent(title_content.this,MainActivity.class);
+                    Intent i = new Intent(title_content.this, MainActivity.class);
                     startActivity(i);
                     finish();
-                    
+
                 }
             }
         });

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +15,16 @@ import java.util.List;
  */
 
 
-
 public class SqliteDatabase extends SQLiteOpenHelper {
 
-    private	static final int DATABASE_VERSION =	5;
-    private	static final String	DATABASE_NAME = "product";
-    private	static final String TABLE_PRODUCTS = "products";
+    private static final int DATABASE_VERSION = 5;
+    private static final String DATABASE_NAME = "product";
+    private static final String TABLE_PRODUCTS = "products";
 
     private static final String COLUMN_ID = "_id";
-    private static final	String COLUMN_PRODUCTNAME = "productname";
+    private static final String COLUMN_PRODUCTNAME = "productname";
     private static final String COLUMN_QUANTITY = "quantity";
+    private static final String COLUMN_URI = "uri";
 
     public SqliteDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -31,7 +32,11 @@ public class SqliteDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String	CREATE_PRODUCTS_TABLE = "CREATE	TABLE " + TABLE_PRODUCTS + "(" + COLUMN_ID + " INTEGER PRIMARY KEY," + COLUMN_PRODUCTNAME + " TEXT," + COLUMN_QUANTITY + " INTEGER" + ")";
+        String CREATE_PRODUCTS_TABLE =
+                "CREATE	TABLE " + TABLE_PRODUCTS + "(" + COLUMN_ID +
+                        " INTEGER PRIMARY KEY," + COLUMN_PRODUCTNAME +
+                        " TEXT," + COLUMN_QUANTITY + " INTEGER," + COLUMN_URI + " TEXT)";
+
         db.execSQL(CREATE_PRODUCTS_TABLE);
     }
 
@@ -41,57 +46,68 @@ public class SqliteDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public List<Product> listProducts(){
+    public List<Product> listProducts() {
         String sql = "select * from " + TABLE_PRODUCTS;
         SQLiteDatabase db = this.getReadableDatabase();
         List<Product> storeProducts = new ArrayList<>();
         Cursor cursor = db.rawQuery(sql, null);
-        if(cursor.moveToFirst()){
-            do{
+        if (cursor.moveToFirst()) {
+            do {
                 int id = Integer.parseInt(cursor.getString(0));
                 String name = cursor.getString(1);
                 String quantity = (cursor.getString(2));
-                storeProducts.add(new Product(id, name, quantity));
-            }while (cursor.moveToNext());
+                String uri = (cursor.getString(3));
+                Product product = new Product(id, name, quantity, uri);
+                storeProducts.add(product);
+                Log.i("Infoo_db_read", product.toString());
+
+            } while (cursor.moveToNext());
         }
         cursor.close();
         return storeProducts;
     }
 
-    public void addProduct(Product product){
+    public void addProduct(Product product) {
+        Log.i("Infoo_db_add", product.toString());
+
         ContentValues values = new ContentValues();
         values.put(COLUMN_PRODUCTNAME, product.getName());
         values.put(COLUMN_QUANTITY, product.getQuantity());
+        values.put(COLUMN_URI, product.getUri());
+        Log.i("Infoo_db_uri", product.getUri());
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(TABLE_PRODUCTS, null, values);
     }
 
-    public void updateProduct(Product product){
+    public void updateProduct(Product product) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PRODUCTNAME, product.getName());
         values.put(COLUMN_QUANTITY, product.getQuantity());
+        values.put(COLUMN_URI, product.getUri());
+
         SQLiteDatabase db = this.getWritableDatabase();
-        db.update(TABLE_PRODUCTS, values, COLUMN_ID	+ "	= ?", new String[] { String.valueOf(product.getId())});
+        db.update(TABLE_PRODUCTS, values, COLUMN_ID + "	= ?", new String[]{String.valueOf(product.getId())});
     }
 
-    public Product findProduct(String name){
-        String query = "Select * FROM "	+ TABLE_PRODUCTS + " WHERE " + COLUMN_PRODUCTNAME + " = " + "name";
+    public Product findProduct(String name) {
+        String query = "Select * FROM " + TABLE_PRODUCTS + " WHERE " + COLUMN_PRODUCTNAME + " = " + "name";
         SQLiteDatabase db = this.getWritableDatabase();
         Product mProduct = null;
-        Cursor cursor = db.rawQuery(query,	null);
-        if	(cursor.moveToFirst()){
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
             int id = Integer.parseInt(cursor.getString(0));
             String productName = cursor.getString(1);
-            String productQuantity =(cursor.getString(2));
-            mProduct = new Product(id, productName, productQuantity);
+            String productQuantity = (cursor.getString(2));
+            String uri = (cursor.getString(3));
+            mProduct = new Product(id, productName, productQuantity, uri);
         }
         cursor.close();
         return mProduct;
     }
 
-    public void deleteProduct(int id){
+    public void deleteProduct(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_PRODUCTS, COLUMN_ID	+ "	= ?", new String[] { String.valueOf(id)});
+        db.delete(TABLE_PRODUCTS, COLUMN_ID + "	= ?", new String[]{String.valueOf(id)});
     }
 }
 
