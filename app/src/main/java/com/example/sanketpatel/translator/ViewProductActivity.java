@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 
 import com.example.sanketpatel.translator.Utils.ViewUtils;
 
+import java.util.Locale;
+
 public class ViewProductActivity extends AppCompatActivity {
     Product product;
     ViewPager viewPager;
@@ -27,6 +30,7 @@ public class ViewProductActivity extends AppCompatActivity {
     TextView textView;
     ImageView imageView;
     ScrollView scrollView;
+    TextToSpeech t1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,15 @@ public class ViewProductActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_product);
         product = (Product) getIntent().getSerializableExtra("product");
         setTitle(product.getName());
+        t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    t1.setLanguage(Locale.ENGLISH);
+                }
+            }
+        });
+
         try {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         } catch (Exception e) {
@@ -116,6 +129,16 @@ public class ViewProductActivity extends AppCompatActivity {
                 sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
                 startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share_using)));
+
+            case R.id.mic:
+
+
+                String toSpeak = product.getQuantity();
+                Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
+                t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+
+
+
             default:
                 return super.onOptionsItemSelected(item);
         }

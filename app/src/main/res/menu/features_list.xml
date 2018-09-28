@@ -14,4 +14,11 @@
         android:icon="@drawable/share"
         app:showAsAction="always"
         android:title="Share" />
+
+
+    <item
+        android:id="@+id/mic"
+        android:icon="@drawable/mic"
+        app:showAsAction="always"
+        android:title="Mic" />
 </menu>
