@@ -3,10 +3,10 @@ package com.example.sanketpatel.translator;
 import java.io.Serializable;
 
 public class Product implements Serializable {
-    private int id;
-    private String name;
-    private String quantity;
-    private String uri;
+    private int id = -1;
+    private String name = "";
+    private String quantity = "";
+    private String uri = "";
 
     public Product() {
     }
@@ -61,6 +61,21 @@ public class Product implements Serializable {
                 ", quantity='" + quantity + '\'' +
                 ", uri='" + uri + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Product)) {
+            return false;
+        }
+        Product p = (Product) obj;
+        return (
+                p.getId() == id &&
+                        p.getQuantity().equals(quantity) &&
+                        p.getName().equals(name) &&
+                        p.getUri().equals(uri)
+        );
+
     }
 
     public String getUri() {

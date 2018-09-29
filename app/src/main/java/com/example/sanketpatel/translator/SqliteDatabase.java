@@ -30,6 +30,18 @@ public class SqliteDatabase extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+
+    public interface OnDatabaseChangeListener {
+        void itemAdded(Product product);
+
+        void itemChanged(Product product);
+
+        void itemRemoved(int itemID);
+
+    }
+
+    public OnDatabaseChangeListener onDatabaseChangeListener;
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_PRODUCTS_TABLE =
@@ -59,7 +71,6 @@ public class SqliteDatabase extends SQLiteOpenHelper {
                 String uri = (cursor.getString(3));
                 Product product = new Product(id, name, quantity, uri);
                 storeProducts.add(product);
-                Log.i("Infoo_db_read", product.toString());
 
             } while (cursor.moveToNext());
         }
@@ -68,15 +79,17 @@ public class SqliteDatabase extends SQLiteOpenHelper {
     }
 
     public void addProduct(Product product) {
-        Log.i("Infoo_db_add", product.toString());
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_PRODUCTNAME, product.getName());
         values.put(COLUMN_QUANTITY, product.getQuantity());
         values.put(COLUMN_URI, product.getUri());
-        Log.i("Infoo_db_uri", product.getUri());
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(TABLE_PRODUCTS, null, values);
+
+        if (onDatabaseChangeListener != null){
+            onDatabaseChangeListener.itemAdded(product);
+        }
     }
 
     public void updateProduct(Product product) {
@@ -84,6 +97,10 @@ public class SqliteDatabase extends SQLiteOpenHelper {
         values.put(COLUMN_PRODUCTNAME, product.getName());
         values.put(COLUMN_QUANTITY, product.getQuantity());
         values.put(COLUMN_URI, product.getUri());
+
+        if (onDatabaseChangeListener != null){
+            onDatabaseChangeListener.itemChanged(product);
+        }
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.update(TABLE_PRODUCTS, values, COLUMN_ID + "	= ?", new String[]{String.valueOf(product.getId())});
@@ -105,9 +122,17 @@ public class SqliteDatabase extends SQLiteOpenHelper {
         return mProduct;
     }
 
+    public void setOnDatabaseChangeListener(OnDatabaseChangeListener onDatabaseChangeListener) {
+        this.onDatabaseChangeListener = onDatabaseChangeListener;
+    }
+
     public void deleteProduct(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_PRODUCTS, COLUMN_ID + "	= ?", new String[]{String.valueOf(id)});
+        if (onDatabaseChangeListener != null){
+            onDatabaseChangeListener.itemRemoved(id);
+        }
+
     }
 }
 

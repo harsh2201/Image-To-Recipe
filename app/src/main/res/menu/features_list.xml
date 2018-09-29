@@ -25,6 +25,11 @@
     <item
         android:id="@+id/edit"
         android:icon="@drawable/img_edit"
-        app:showAsAction="always"
-        android:title="Edit" />
+        android:title="Edit"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/img_delete"
+        android:title="Delete"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     static SqliteDatabase mDatabase;
 
+    List<Product> allProducts;
+    ProductAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,11 +84,11 @@ public class MainActivity extends AppCompatActivity {
         productView.setHasFixedSize(true);
 
         mDatabase = new SqliteDatabase(this);
-        List<Product> allProducts = mDatabase.listProducts();
+        allProducts = mDatabase.listProducts();
 
         if (allProducts.size() > 0) {
             productView.setVisibility(View.VISIBLE);
-            ProductAdapter mAdapter = new ProductAdapter(this, allProducts);
+            mAdapter = new ProductAdapter(this, allProducts);
 
             // OnClickListener
             mAdapter.setOnClickListener(new ProductAdapter.OnClickListener() {
@@ -95,6 +97,36 @@ public class MainActivity extends AppCompatActivity {
                     Intent i = new Intent(getApplicationContext(), ViewProductActivity.class);
                     i.putExtra("product", product);
                     startActivity(i);
+                }
+            });
+
+
+            mDatabase.setOnDatabaseChangeListener(new SqliteDatabase.OnDatabaseChangeListener() {
+                @Override
+                public void itemAdded(Product product) {
+                    allProducts.add(product);
+                    mAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void itemChanged(Product product) {
+                    for (int i = 0; i < allProducts.size(); i++) {
+                        if (product.getId() == allProducts.get(i).getId()) {
+                            allProducts.set(i, product);
+                            mAdapter.notifyDataSetChanged();
+                            break;
+                        }
+                    }
+                }
+
+                @Override
+                public void itemRemoved(int itemID) {
+                    for (int i = 0; i < allProducts.size(); i++) {
+                        if ( allProducts.get(i).getId() == itemID) {
+                            allProducts.remove(i);
+                            break;
+                        }
+                    }
                 }
             });
 
@@ -122,33 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 clipboard.setPrimaryClip(clip);
             }
         });
-
-        //TODO: Remove this
-        //findViewById(R.id.choose_from_gallery).setOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View v) {
-        //        Intent intent = new Intent();
-        //        intent.setType("image/*");
-        //        intent.setAction(Intent.ACTION_GET_CONTENT);
-        //        startActivityForResult(intent, REQUEST_GALLERY);
-        //    }
-        //});
-        //findViewById(R.id.take_a_photo).setOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View v) {
-        //        String filename = System.currentTimeMillis() + ".jpg";
-        //
-        //        ContentValues values = new ContentValues();
-        //        values.put(MediaStore.Images.Media.TITLE, filename);
-        //        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-        //        imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        //
-        //        Intent intent = new Intent();
-        //        intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-        //        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        //        startActivityForResult(intent, REQUEST_CAMERA);
-        //    }
-        //});
 
         detectedTextView = (TextView) findViewById(R.id.detected_text);
         detectedTextView.setMovementMethod(new ScrollingMovementMethod());
@@ -291,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
 //            mDatabase.addProduct(newProduct);
 //
 //            //refresh the activity
-           finish();
+//            finish();
 
 
         } finally {
@@ -343,7 +348,6 @@ public class MainActivity extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
             // CropImage.activity(Uri.fromFile(outputFile)).start(MainActivity.this);
-            Log.i("INfoo", "Done!");
         } catch (Exception e) {
             e.printStackTrace();
         }

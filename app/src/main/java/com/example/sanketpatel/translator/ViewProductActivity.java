@@ -3,12 +3,14 @@ package com.example.sanketpatel.translator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,17 +27,18 @@ import java.util.Locale;
 
 public class ViewProductActivity extends AppCompatActivity {
     Product product;
-    ViewPager viewPager;
     Button showImageButton, showTextButton;
     TextView textView;
     ImageView imageView;
     ScrollView scrollView;
     TextToSpeech t1;
+    static SqliteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_product);
+        database = new SqliteDatabase(this);
         product = (Product) getIntent().getSerializableExtra("product");
         setTitle(product.getName());
         t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
@@ -141,6 +144,29 @@ public class ViewProductActivity extends AppCompatActivity {
                 startActivity(i);
                 finish();
                 return true;
+
+            case R.id.delete:
+
+                AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+
+                builder.setTitle("Delete")
+                        .setMessage("Are you sure you want to delete this entry?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                database.deleteProduct(product.getId());
+                                Toast.makeText(getApplicationContext(), "Deleted.", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+
+
             default:
                 return super.onOptionsItemSelected(item);
         }
