@@ -14,7 +14,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -119,7 +118,6 @@ public class ViewProductActivity extends AppCompatActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("brij", product.getQuantity());
                 clipboard.setPrimaryClip(clip);
-
                 Toast.makeText(getApplicationContext(), "Copied to Clipboard", Toast.LENGTH_LONG).show();
                 return true;
 
@@ -138,7 +136,7 @@ public class ViewProductActivity extends AppCompatActivity {
                 t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
                 return true;
             case R.id.edit:
-                Intent i = new Intent(ViewProductActivity.this, EditActivity.class);;
+                Intent i = new Intent(ViewProductActivity.this, EditActivity.class);
                 i.putExtra("product", product);
                 startActivity(i);
                 finish();

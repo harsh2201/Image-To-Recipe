@@ -42,10 +42,10 @@ public class EditActivity extends AppCompatActivity {
     public void onBackPressed() {
         String name = "", text = "";
         if (!TextUtils.isEmpty(titleEditText.getText())) {
-            name = titleEditText.getText().toString().trim();
+            name = titleEditText.getText().toString();
         }
         if (!TextUtils.isEmpty(detectedEditText.getText())) {
-            text = detectedEditText.getText().toString().trim();
+            text = detectedEditText.getText().toString();
         }
 
         if (!(name.equals(product.getName()) && text.equals(product.getQuantity()))) {
@@ -54,21 +54,21 @@ public class EditActivity extends AppCompatActivity {
             anyChanges = false;
         }
 
-
         if (anyChanges) {
 
             AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
 
             builder.setTitle("Discard changes")
                     .setMessage("Are you sure you want to discard this entry?")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            updateProduct();
                             finish();
                         }
                     })
-                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    .setNegativeButton("Save", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            updateProduct();
+                            finish();
                         }
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
