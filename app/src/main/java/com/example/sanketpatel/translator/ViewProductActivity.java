@@ -38,10 +38,10 @@ public class ViewProductActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_product);
         product = (Product) getIntent().getSerializableExtra("product");
         setTitle(product.getName());
-        t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+        t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if(status != TextToSpeech.ERROR) {
+                if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.ENGLISH);
                 }
             }
@@ -80,7 +80,7 @@ public class ViewProductActivity extends AppCompatActivity {
         ViewUtils.setEnable(showImageButton);
         ViewUtils.setDisable(view);
         showImageButton.setTextColor(Color.GRAY);
-        ((Button)view).setTextColor(Color.WHITE);
+        ((Button) view).setTextColor(Color.WHITE);
     }
 
     public void onShowImageButtonClick(View view) {
@@ -89,7 +89,7 @@ public class ViewProductActivity extends AppCompatActivity {
         ViewUtils.setEnable(showTextButton);
         ViewUtils.setDisable(view);
         showTextButton.setTextColor(Color.GRAY);
-        ((Button)view).setTextColor(Color.WHITE);
+        ((Button) view).setTextColor(Color.WHITE);
     }
 
     // Swipe layout
@@ -113,13 +113,13 @@ public class ViewProductActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.copy:
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("brij", product.getQuantity());
                 clipboard.setPrimaryClip(clip);
 
-                Toast.makeText(getApplicationContext(),"Copied to Clipboard",Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Copied to Clipboard", Toast.LENGTH_LONG).show();
                 return true;
 
             case R.id.share:
@@ -129,15 +129,13 @@ public class ViewProductActivity extends AppCompatActivity {
                 sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
                 startActivity(Intent.createChooser(sharingIntent, getResources().getString(R.string.share_using)));
+                return true;
 
             case R.id.mic:
-
-
                 String toSpeak = product.getQuantity();
-                Toast.makeText(getApplicationContext(), toSpeak,Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), toSpeak, Toast.LENGTH_SHORT).show();
                 t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
-
-
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
