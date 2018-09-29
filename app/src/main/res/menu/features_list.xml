@@ -21,4 +21,10 @@
         android:icon="@drawable/img_mic"
         app:showAsAction="always"
         android:title="Mic" />
+
+    <item
+        android:id="@+id/edit"
+        android:icon="@drawable/img_edit"
+        app:showAsAction="always"
+        android:title="Edit" />
 </menu>

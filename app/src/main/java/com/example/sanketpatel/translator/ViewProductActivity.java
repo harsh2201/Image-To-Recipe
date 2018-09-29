@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -136,7 +137,12 @@ public class ViewProductActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), toSpeak, Toast.LENGTH_SHORT).show();
                 t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
                 return true;
-
+            case R.id.edit:
+                Intent i = new Intent(ViewProductActivity.this, EditActivity.class);;
+                i.putExtra("product", product);
+                startActivity(i);
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

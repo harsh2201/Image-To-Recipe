@@ -40,6 +40,9 @@
         <activity
             android:name=".ViewProductActivity"
             android:theme="@style/Theme.AppCompat" />
+        <activity
+            android:name=".EditActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
     </application>
 
 </manifest>
