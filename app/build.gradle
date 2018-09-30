@@ -24,7 +24,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.0'
     implementation 'com.intuit.sdp:sdp-android:1.0.3'
-
+    implementation 'com.github.florent37:runtime-permission:1.0.5'
     implementation 'com.gospelware.liquidbutton:liquidButtonLib:1.1.5'
     compile 'com.android.support:cardview-v7:27.1.0'
     compile 'com.android.support:recyclerview-v7:27.1.0'

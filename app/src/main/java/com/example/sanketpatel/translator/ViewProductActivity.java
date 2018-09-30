@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -53,7 +52,7 @@ public class ViewProductActivity extends AppCompatActivity {
         try {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         } catch (Exception e) {
-        }
+        }                                           
         try {
             getActionBar().setDisplayHomeAsUpEnabled(true);
         } catch (Exception e) {
@@ -145,6 +144,7 @@ public class ViewProductActivity extends AppCompatActivity {
                 finish();
                 return true;
 
+
             case R.id.delete:
 
                 AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
@@ -171,4 +171,7 @@ public class ViewProductActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
+
 }

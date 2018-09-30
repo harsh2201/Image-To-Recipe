@@ -1,5 +1,6 @@
 package com.example.sanketpatel.translator;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -7,15 +8,19 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -72,10 +77,15 @@ public class MainActivity extends AppCompatActivity {
     List<Product> allProducts;
     ProductAdapter mAdapter;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        
+
 
 
         RecyclerView productView = (RecyclerView) findViewById(R.id.product_list);
@@ -187,28 +197,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                animateFab();
-                String filename = System.currentTimeMillis() + ".jpg";
+                if (isPermissionGranted()) {
+                    animateFab();
+                    String filename = System.currentTimeMillis() + ".jpg";
 
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.TITLE, filename);
-                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-                imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.Images.Media.TITLE, filename);
+                    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                    imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-                Intent intent = new Intent()
-                        .setAction(MediaStore.ACTION_IMAGE_CAPTURE)
-                        .putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                    Intent intent = new Intent()
+                            .setAction(MediaStore.ACTION_IMAGE_CAPTURE)
+                            .putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
-                startActivityForResult(intent, REQUEST_CAMERA);
+                    startActivityForResult(intent, REQUEST_CAMERA);
+                }
             }
         });
 
         fabOpenGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                animateFab();
-                Intent intent = new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent, REQUEST_GALLERY);
+                if(isPermissionGranted()) {
+                    animateFab();
+                    Intent intent = new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(intent, REQUEST_GALLERY);
+                }
             }
 
         });
@@ -428,6 +442,54 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.show();
         return 1;
+    }
+
+    public  boolean isPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if ((checkSelfPermission(Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED)||(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED)||checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v("TAG","Permission is granted");
+                return true;
+            } else {
+
+                Log.v("TAG","Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("TAG","Permission is granted");
+            return true;
+        }
+    }
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+
+            case 1: {
+
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getApplicationContext(), "Permission granted", Toast.LENGTH_SHORT).show();
+
+
+
+
+                } else {
+                    Toast.makeText(getApplicationContext(), "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
 
