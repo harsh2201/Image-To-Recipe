@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">translator</string>
+    <string name="app_name">Photo to Food</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="product_name">Product name</string>
     <string name="enter_name">Enter name</string>

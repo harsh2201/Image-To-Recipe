@@ -2,6 +2,7 @@ package com.example.sanketpatel.translator;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
@@ -38,11 +39,23 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.sanketpatel.translator.Utils.ViewUtils;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImage;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -76,6 +89,10 @@ public class MainActivity extends AppCompatActivity {
 
     List<Product> allProducts;
     ProductAdapter mAdapter;
+    EditText food;
+    String strFood;
+    RecyclerView productView;
+    private static ProgressDialog pDialog;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -84,11 +101,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        
-
-
-
-        RecyclerView productView = (RecyclerView) findViewById(R.id.product_list);
+        productView = (RecyclerView) findViewById(R.id.product_list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         productView.setLayoutManager(linearLayoutManager);
         productView.setHasFixedSize(true);
@@ -132,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void itemRemoved(int itemID) {
                     for (int i = 0; i < allProducts.size(); i++) {
-                        if ( allProducts.get(i).getId() == itemID) {
+                        if (allProducts.get(i).getId() == itemID) {
                             allProducts.remove(i);
                             break;
                         }
@@ -177,9 +190,13 @@ public class MainActivity extends AppCompatActivity {
         fabAdd = findViewById(R.id.main_addFAB);
         fabOpenCam = findViewById(R.id.main_openCamFAB);
         fabOpenGallery = findViewById(R.id.main_openGalerryFAB);
+        food = findViewById(R.id.detected_text);
         fabOpenCam.setVisibility(View.GONE);
         fabOpenGallery.setVisibility(View.GONE);
 
+        pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading...");
+        pDialog.setCancelable(false);
 
         fabforward = AnimationUtils.loadAnimation(this, R.anim.rotoate_forward);
         fabbackward = AnimationUtils.loadAnimation(this, R.anim.rotoate_backward);
@@ -189,6 +206,49 @@ public class MainActivity extends AppCompatActivity {
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showPDialog();
+                strFood = food.getText().toString();
+                RequestQueue mReq= Volley.newRequestQueue(MainActivity.this);
+                String URL="https://api.edamam.com/search?q=" + strFood + "&app_id=088b327b&app_key=684173103f824a09fa4396ebf3b516b1&from=0&to=10";
+                JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET, URL, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+//                        Log.d(TAG, jsonObject.toString());
+
+                        try {
+                            JSONArray foodsJsonArr = jsonObject.getJSONArray("hits");
+                            for (int i = 0; i < foodsJsonArr.length(); i++) {
+                                JSONObject c = foodsJsonArr.getJSONObject(i).getJSONObject("recipe");
+                                JSONArray a = c.getJSONArray("ingredients");
+                                String ingredient = "";
+                                for (int j = 0; j < a.length(); j++) {
+                                    JSONObject json=a.getJSONObject(j);
+                                    String text = json.getString("text");
+                                    int weight = json.getInt("weight");
+                                    ingredient +=""+(j+1)+". "+ text+ "  \nWeight : "+weight+"\n\n";
+                                }
+                                food.append(ingredient);
+                                allProducts.add(new Product(
+                                        1, ""+c.getString("label"), ""+ingredient,""
+                                ));
+                            }
+                            productView.setAdapter(mAdapter);
+
+                        } catch (Exception e) {
+                            System.out.println(e);
+                            Toast.makeText(MainActivity.this, ""+e.toString(), Toast.LENGTH_LONG).show();
+                        }
+                        disPDialog();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        VolleyLog.d("", "ERROR" + volleyError.getMessage());
+                        Toast.makeText(MainActivity.this, volleyError.getMessage(), Toast.LENGTH_SHORT).show();
+                        disPDialog();
+                    }
+                });
+                mReq.add(jsonObjReq);
                 animateFab();
             }
         });
@@ -218,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
         fabOpenGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(isPermissionGranted()) {
+                if (isPermissionGranted()) {
                     animateFab();
                     Intent intent = new Intent().setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
                     startActivityForResult(intent, REQUEST_GALLERY);
@@ -260,6 +320,17 @@ public class MainActivity extends AppCompatActivity {
         isOpen = !isOpen;
     }
 
+    public static void showPDialog() {
+        if (!pDialog.isShowing()) {
+            pDialog.show();
+        }
+    }
+
+    public static void disPDialog() {
+        if (pDialog.isShowing()) {
+            pDialog.dismiss();
+        }
+    }
 
     private void inspectFromBitmap(Bitmap bitmap, Uri uri) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(this).build();
@@ -444,27 +515,25 @@ public class MainActivity extends AppCompatActivity {
         return 1;
     }
 
-    public  boolean isPermissionGranted() {
+    public boolean isPermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if ((checkSelfPermission(Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_GRANTED)||(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED)||checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) || (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v("TAG","Permission is granted");
+                Log.v("TAG", "Permission is granted");
                 return true;
             } else {
 
-                Log.v("TAG","Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                Log.v("TAG", "Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v("TAG","Permission is granted");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("TAG", "Permission is granted");
             return true;
         }
     }
-
 
 
     @Override
@@ -477,8 +546,6 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getApplicationContext(), "Permission granted", Toast.LENGTH_SHORT).show();
-
-
 
 
                 } else {
